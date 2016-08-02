@@ -100,7 +100,7 @@ jack_shutdown (void *arg)
 
  void signalHandler(int sig)
 {
-  printf("Stopping\n");
+  printf("Stopping in signal signalHandler\n");
   running = 0;
   pthread_cond_signal(&dataReady);
 
@@ -110,7 +110,14 @@ jack_shutdown (void *arg)
 
  int
  main (int argc, char *argv[])
- {
+ {         
+         unsigned currentTime = (unsigned) time(NULL);
+         char sound_filename[30];
+         sprintf(sound_filename, "records/capture_%d.wav", currentTime  );
+         char lock_filename[30];
+         sprintf(lock_filename, "records/capture_%d.lock", currentTime  );
+         FILE *lock_file = fopen(lock_filename,"wb" );
+         
          jack_client_t *client;
          const char **ports;
  
@@ -176,7 +183,7 @@ jack_shutdown (void *arg)
                  fprintf(stderr, "Cannot find any physical playback ports\n");
                  exit(1);
          }
- 		printf("num ports: %d\n",sizeof(ports)/sizeof(char));
+ 	
         if (jack_connect (client, jack_port_name (output_port_l), ports[2]) 
         	 ) {
                 fprintf (stderr, "cannot connect output ports l\n");
@@ -193,7 +200,7 @@ jack_shutdown (void *arg)
       	info.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
       	info.channels = 1;
       	info.samplerate = 44100;
-      	SNDFILE *sndFile = sf_open("capture2.wav", SFM_WRITE, &info);
+      	SNDFILE *sndFile = sf_open(sound_filename, SFM_WRITE, &info);
 
       	if (sndFile == NULL) {
         	fprintf(stderr, "Error writing wav file: %s\n", sf_strerror(sndFile));
@@ -222,11 +229,13 @@ jack_shutdown (void *arg)
  			}
  		} while (running);
 
-        printf("Closing\n");
-      	jack_client_close(client);
-      	sf_write_sync(sndFile);
-      	sf_close(sndFile);
-        exit (0);
+    printf("Closing\n");
+    jack_client_close(client);
+    sf_write_sync(sndFile);
+    sf_close(sndFile);
+    fclose(lock_file);
+    remove(lock_filename);
+    exit (0);
  }
  
  
