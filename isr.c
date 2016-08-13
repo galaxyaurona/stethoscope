@@ -52,8 +52,11 @@ static volatile int globalCounter [8] ;
 
 void myInterrupt0 (void) { 
 	++globalCounter [0] ;
-	printf("interrupted");
-	digitalWrite(2, globalCounter[0] % 2);
+	digitalWrite(2, 1);
+	if (globalCounter[0] > 1) {
+		int results  = system("echo odroid | sudo ./simple");
+	}
+	digitalWrite(2, 0);
  }
 
 
@@ -67,13 +70,13 @@ int main (void)
 {
   int gotOne, pin ;
   int myCounter [8] ;
-
+ wiringPiSetup();
   for (pin = 0 ; pin < 8 ; ++pin) 
     globalCounter [pin] = myCounter [pin] = 0 ;
-pinMode(2,OUTPUT)
+pinMode(2,OUTPUT);
  // set pin mode to be ouput
   wiringPiISR (0, INT_EDGE_FALLING, &myInterrupt0) ;
-
+ printf(" edges %d %d ", INT_EDGE_FALLING, INT_EDGE_RISING);
 for (;;)
   {
 

@@ -14,6 +14,7 @@
 #include <jack/ringbuffer.h>
 #include <sndfile.h>
 #include <signal.h>
+#include <wiringPi.h>
 
 
 
@@ -291,13 +292,20 @@ setup_ports (jack_thread_info_t *info) // 1 channcel, only need other
 
     info->can_process = 1;      /* process() can start, now */
 }
+void myInterrupt0 (void) { 
 
+	printf("interrupted");
+	//digitalWrite(2, globalCounter[0] % 2);
+	//run_disk_thread (&thread_info);
+ }
 
  int
  main (int argc, char *argv[])
  {       
-
-         
+	wiringPiSetup();
+         pinMode(2,OUTPUT);
+	 // set pin mode to be ouput
+	 wiringPiISR (0, INT_EDGE_FALLING, &myInterrupt0) ;
 
          jack_client_t *client;
     
@@ -362,7 +370,9 @@ setup_ports (jack_thread_info_t *info) // 1 channcel, only need other
          /* Since this is just a toy, run for a few seconds, then finish */
     signal(SIGINT, signalHandler);
 
-
+	/*while (2>1) {
+		digitalWrite(2,thread_info.can_capture);
+	}*/
 
     printf("Closing\n");
     jack_client_close(client);
