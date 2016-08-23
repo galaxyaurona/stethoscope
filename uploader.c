@@ -47,7 +47,7 @@
 #include <sys/stat.h>
 
  int sendFile(char * filename) {
-   printf("fullpath %s\n", filename);
+   //printf("fullpath %s\n", filename);
    CURL *curl;
    CURLcode res;
    struct curl_httppost *formpost=NULL;
@@ -76,8 +76,8 @@
     res = curl_easy_perform(curl);
     /* Check for errors */ 
     if(res != CURLE_OK){
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+      //fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              //curl_easy_strerror(res));
       return -1;
     }
   
@@ -102,6 +102,7 @@ int main(int argc, char *argv[])
   
   /* print all the files and directories within directory */
   while (1) { // running continously uploading file
+    sleep(10);
     if ((dir = opendir ("records")) != NULL) { // refreshing directory
       while ((ent = readdir (dir)) != NULL) {
          if (strlen(ent->d_name) < 3) {

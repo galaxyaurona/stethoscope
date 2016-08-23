@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <wiringPi.h>
+#include <stdbool.h>
 
 
 // globalCounter:
@@ -43,8 +44,9 @@
 //	Should be declared volatile to make sure the compiler doesn't cache it.
 
 static volatile int globalCounter [8] ;
-
-
+static volatile bool blinking;
+long const period=3200000;
+static volatile start;
 /*
  * myInterrupt:
  *********************************************************************************
@@ -52,11 +54,21 @@ static volatile int globalCounter [8] ;
 
 void myInterrupt0 (void) { 
 	++globalCounter [0] ;
-	digitalWrite(2, 1);
-	if (globalCounter[0] > 1) {
-		int results  = system("echo odroid | sudo ./simple");
+	//digitalWrite(2, 1);
+	
+	while (start ==-1) {                                                                                        
+		start = system("echo odroid | sudo -S jackd -d alsa -d hw:1 -S true -r 44100 &");
 	}
-	digitalWrite(2, 0);
+	//printf("current working dir\n");
+	//system("pwd");
+	//printf("print jackd dir\n");
+	//system("ps aux | grep jackd");
+	blinking = true;
+	if (globalCounter[0] > 1) {
+		int results  = system("~/stethoscope/simple");
+	}
+	//digitalWrite(2, 0);
+	blinking = false;
  }
 
 
@@ -70,16 +82,33 @@ int main (void)
 {
   int gotOne, pin ;
   int myCounter [8] ;
- wiringPiSetup();
+  long count ;
+  wiringPiSetup();
+  start=-1;
+  blinking = false;
   for (pin = 0 ; pin < 8 ; ++pin) 
     globalCounter [pin] = myCounter [pin] = 0 ;
-pinMode(2,OUTPUT);
- // set pin mode to be ouput
+  pinMode(2,OUTPUT);
+  digitalWrite(2, 0);
+  // set pin mode to be ouput
   wiringPiISR (0, INT_EDGE_FALLING, &myInterrupt0) ;
- printf(" edges %d %d ", INT_EDGE_FALLING, INT_EDGE_RISING);
-for (;;)
+  
+  for (;;)
   {
-
+	if (blinking){
+		count = (count+1) % period;
+		//printf("count %d",count);
+	
+		if (count > (period/2) ) {
+			digitalWrite(2, 0);
+		} else {
+			digitalWrite(2, 1);
+		}
+	} else {
+		count =0;
+		digitalWrite(2,1);
+	}
+	
   }
 
   return 0 ;
