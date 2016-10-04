@@ -38,6 +38,8 @@
 #include <wiringPi.h>
 #include <stdbool.h>
 
+#define LED_PIN 21
+#define BUTTON_PIN 2
 
 // globalCounter:
 //	Global variable to count interrupts
@@ -88,10 +90,10 @@ int main (void)
   blinking = false;
   for (pin = 0 ; pin < 8 ; ++pin) 
     globalCounter [pin] = myCounter [pin] = 0 ;
-  pinMode(2,OUTPUT);
-  digitalWrite(2, 0);
+  pinMode(LED_PIN,OUTPUT);
+  digitalWrite(LED_PIN, 0);
   // set pin mode to be ouput
-  wiringPiISR (0, INT_EDGE_FALLING, &myInterrupt0) ;
+  wiringPiISR (BUTTON_PIN, INT_EDGE_FALLING, &myInterrupt0) ;
   
   for (;;)
   {
@@ -100,13 +102,13 @@ int main (void)
 		//printf("count %d",count);
 	
 		if (count > (period/2) ) {
-			digitalWrite(2, 0);
+			digitalWrite(LED_PIN, 0);
 		} else {
-			digitalWrite(2, 1);
+			digitalWrite(LED_PIN, 1);
 		}
 	} else {
 		count =0;
-		digitalWrite(2,1);
+		digitalWrite(LED_PIN,1);
 	}
 	
   }
